@@ -3,6 +3,7 @@ module Typeclassopedia where
 
 import           Control.Applicative
 import           Data.Char
+import Prelude hiding (concat)
 
 -- Pair
 
@@ -22,7 +23,7 @@ instance Functor Pair where
 instance Applicative Pair where
     pure = pair
     (Pair f g) <*> (Pair x y) = Pair (f x) (g y)
--- Can't be a Monad
+-- Can't be a Monad?
 
 -- Option
 
@@ -43,9 +44,19 @@ instance Monad Option where
 
 -- List
 
+-- TODO make Foldable
 data List a = Cons a (List a) | Nil deriving (Show)
 
 list x = Cons x Nil
+
+(<>) :: a -> List a -> List a
+x <> xs = Cons x xs
+infixr 9 <>
+
+concat :: List (List a) -> List a
+concat Nil = Nil
+concat (Cons (Cons x Nil) ls) = x <> concat ls
+concat (Cons (Cons x xs) ls) = x <> concat (xs <> ls)
 
 instance Functor List where
     fmap _ Nil = Nil
@@ -55,6 +66,15 @@ instance Applicative List where
     Nil <*> _ = Nil
     _ <*> Nil = Nil
     (Cons f fs) <*> (Cons x xs) = Cons (f x) (fs <*> xs)
+instance Monad List where
+    return          = list
+    Nil >>= _       = Nil
+    xs >>= k        = concat $ fmap k xs
 
 main = print $
-    Cons (+1) (list (+2)) <*> Cons 1 (list 1)
+    -- Dear reader, yes this is stupid but I'm playing around
+    a >>= (\x -> x <> (x * x) <> Nil)
+    where
+        a = 1 <> 2 <> Nil
+        b = 3 <> 4 <> Nil
+        c = 5 <> 6 <> Nil
