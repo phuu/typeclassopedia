@@ -40,7 +40,21 @@ instance Monad Option where
     return         = Some
     (Some x) >>= k = k x
     None >>= _     = None
-   
+
+-- List
+
+data List a = Cons a (List a) | Nil deriving (Show)
+
+list x = Cons x Nil
+
+instance Functor List where
+    fmap _ Nil = Nil
+    fmap f (Cons x xs) = Cons (f x) (fmap f xs)
+instance Applicative List where
+    pure = list
+    Nil <*> _ = Nil
+    _ <*> Nil = Nil
+    (Cons f fs) <*> (Cons x xs) = Cons (f x) (fs <*> xs)
 
 main = print $
-    Some 1 >>= return . (+1)
+    Cons (+1) (list (+2)) <*> Cons 1 (list 1)
