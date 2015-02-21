@@ -1,5 +1,5 @@
 -- | Main entry point to the application.
-module Functors where
+module Typeclassopedia where
 
 import           Control.Applicative
 import           Data.Char
