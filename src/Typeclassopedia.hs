@@ -3,8 +3,10 @@ module Typeclassopedia where
 
 import           Control.Applicative
 import           Data.Char
-import Prelude hiding (concat)
+import Prelude hiding (concat, foldr, foldl)
 import Data.Monoid
+import Data.Foldable hiding (concat)
+import Data.Traversable
 
 -- ==================
 -- Pair
@@ -51,7 +53,6 @@ instance Monad Option where
 -- List
 -- ==================
 
--- TODO make Foldable
 data List a = Cons a (List a) | Nil deriving (Show)
 
 list :: a -> List a
@@ -65,10 +66,13 @@ append :: List a -> List a -> List a
 Nil `append` ys = ys
 (Cons x xs) `append` ys = x `cons` (xs `append` ys)
 
-concat :: List (List a) -> List a
-concat Nil = Nil
+
+concat :: (Monoid m) => List m -> m
+concat Nil = mempty
 concat (Cons xs Nil) = xs
-concat (Cons xs ls) = xs `append` (concat ls)
+concat (Cons xs ls) = xs `mappend` (concat ls)
+
+
 
 -- *
 
@@ -79,13 +83,21 @@ instance Monoid (List a) where
 -- * -> *
 
 instance Functor List where
-    fmap _ Nil = Nil
+    fmap _ Nil         = Nil
     fmap f (Cons x xs) = Cons (f x) (fmap f xs)
 instance Applicative List where
-    pure = list
+    pure      = list
     Nil <*> _ = Nil
     _ <*> Nil = Nil
-    (Cons f fs) <*> (Cons x xs) = Cons (f x) (fs <*> xs) 
+    (Cons f fs) <*> (Cons x xs) = Cons (f x) (fs <*> xs)
+
+instance Foldable List where
+    foldr _ z Nil         = z
+    foldr f z (Cons x xs) = f x (foldr f z xs)
+instance Traversable List where
+    traverse _ Nil         = pure Nil
+    traverse f (Cons x xs) = Cons <$> (f x) <*> (traverse f xs)
+
 instance Monad List where
     return          = list
     Nil >>= _       = Nil
@@ -98,6 +110,8 @@ main = do
     print $ b `append` c
     print $ 1 `cons` mempty
     print $ a `mappend` b
+    print $ foldr (+) 0 a
+    print $ traverse (list . (+1)) a
     where
         a = 1 `cons` 2 `cons` Nil
         b = 3 `cons` 4 `cons` Nil
