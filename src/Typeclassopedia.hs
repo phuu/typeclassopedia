@@ -95,6 +95,7 @@ instance Foldable List where
     foldr _ z Nil         = z
     foldr f z (Cons x xs) = f x (foldr f z xs)
 instance Traversable List where
+    -- wtf is this for, seems like return $ f <$> xs
     traverse _ Nil         = pure Nil
     traverse f (Cons x xs) = Cons <$> (f x) <*> (traverse f xs)
 
@@ -112,6 +113,8 @@ main = do
     print $ a `mappend` b
     print $ foldr (+) 0 a
     print $ traverse (list . (+1)) a
+    print $ traverse (list . (+1)) a
+    print $ list $ (+1) <$> a
     where
         a = 1 `cons` 2 `cons` Nil
         b = 3 `cons` 4 `cons` Nil
