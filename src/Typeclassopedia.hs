@@ -92,10 +92,6 @@ instance Applicative List where
 instance Foldable List where
     foldr _ z Nil         = z
     foldr f z (Cons x xs) = f x (foldr f z xs)
-instance Traversable List where
-    -- wtf is this for, seems like return $ f <$> xs
-    traverse _ Nil         = pure Nil
-    traverse f (Cons x xs) = Cons <$> (f x) <*> (traverse f xs)
 
 instance Monad List where
     return          = list
@@ -110,7 +106,6 @@ main = do
     print $ 1 `cons` mempty
     print $ a `mappend` b
     print $ foldr (+) 0 a
-    print $ traverse (list . (+1)) a
     print $ list $ (+1) <$> a
     print $ (+) <$> a <*> c
     print $ join $ a `cons` b `cons` Nil
