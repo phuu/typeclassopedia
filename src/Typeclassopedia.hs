@@ -66,13 +66,10 @@ append :: List a -> List a -> List a
 Nil `append` ys = ys
 (Cons x xs) `append` ys = x `cons` (xs `append` ys)
 
-
 concat :: (Monoid m) => List m -> m
 concat Nil = mempty
 concat (Cons xs Nil) = xs
 concat (Cons xs ls) = xs `mappend` (concat ls)
-
-
 
 -- *
 
