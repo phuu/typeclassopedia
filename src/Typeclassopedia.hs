@@ -7,6 +7,7 @@ import Prelude hiding (concat, foldr, foldl)
 import Data.Monoid
 import Data.Foldable hiding (concat)
 import Data.Traversable
+import Control.Monad
 
 -- ==================
 -- Pair
@@ -53,7 +54,7 @@ instance Monad Option where
 -- List
 -- ==================
 
-data List a = Cons a (List a) | Nil deriving (Show)
+data List a = Cons a (List a) | Nil deriving (Show,Eq)
 
 list :: a -> List a
 list x = Cons x Nil
@@ -110,9 +111,11 @@ main = do
     print $ a `mappend` b
     print $ foldr (+) 0 a
     print $ traverse (list . (+1)) a
-    print $ traverse (list . (+1)) a
     print $ list $ (+1) <$> a
+    print $ (+) <$> a <*> c
+    print $ join $ a `cons` b `cons` Nil
+    print $ (==) a $ pure id <*> a -- Must be True
     where
         a = 1 `cons` 2 `cons` Nil
         b = 3 `cons` 4 `cons` Nil
-        c = 5 `cons` 6 `cons` Nil
+        c = 5 `cons` 6 `cons` 7 `cons` Nil
