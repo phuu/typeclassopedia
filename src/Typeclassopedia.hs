@@ -87,7 +87,7 @@ instance Applicative List where
     pure      = list
     Nil <*> _ = Nil
     _ <*> Nil = Nil
-    (Cons f fs) <*> (Cons x xs) = Cons (f x) (fs <*> xs)
+    (Cons f fs) <*> gs = mappend (f <$> gs) (fs <*> gs)
 
 instance Foldable List where
     foldr _ z Nil         = z
