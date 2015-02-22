@@ -85,10 +85,11 @@ instance Functor List where
     fmap f (Cons x xs) = Cons (f x) (fmap f xs)
 
 instance Applicative List where
-    pure      = list
-    Nil <*> _ = Nil
-    _ <*> Nil = Nil
-    (Cons f fs) <*> gs = mappend (f <$> gs) (fs <*> gs)
+    pure      = return
+    -- Nil <*> _ = Nil
+    -- _ <*> Nil = Nil
+    -- (Cons f fs) <*> gs = mappend (f <$> gs) (fs <*> gs)
+    (<*>) = ap
 
 instance Foldable List where
     foldr _ z Nil         = z
@@ -110,14 +111,26 @@ main = do
     print $ list $ (+1) <$> a
     print $ (+) <$> a <*> c
     print $ join $ a `cons` b `cons` Nil
+    print $ a >>= (return >=> (addWrap 1))
+    print $ a >>= ((addWrap 1) >=> ((mulWrap 2) >=> (addWrap 3)))
     -- The following must be True
     print $ Prelude.all (\(x, y) -> x == y)
         [ (a, pure id <*> a)
         , (a, a >>= return)
         , (a >>= (\x -> (addWrap 1) x >>= (addWrap 2)), (a >>= (addWrap 1)) >>= (addWrap 2))
+        {-
+        return >=> g  =  g
+        g >=> return  =  g
+        (g >=> h) >=> k  =  g >=> (h >=> k)
+        -- Not entirely sure about the last one here
+        -}
+        , (a >>= (return >=> (addWrap 1)), a >>= (addWrap 1))
+        , (a >>= ((addWrap 1) >=> return), a >>= (addWrap 1))
+        , (a >>= ((addWrap 1) >=> ((mulWrap 2) >=> (addWrap 3))), a >>= (((addWrap 1) >=> (mulWrap 2)) >=> (addWrap 3)))
         ]
     where
         a = 1 `cons` 2 `cons` Nil
         b = 3 `cons` 4 `cons` Nil
         c = 5 `cons` 6 `cons` 7 `cons` Nil
         addWrap x = list . ((+) x)
+        mulWrap x = list . ((*) x)
