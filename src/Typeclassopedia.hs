@@ -83,6 +83,7 @@ instance Monoid (List a) where
 instance Functor List where
     fmap _ Nil         = Nil
     fmap f (Cons x xs) = Cons (f x) (fmap f xs)
+
 instance Applicative List where
     pure      = list
     Nil <*> _ = Nil
@@ -109,8 +110,14 @@ main = do
     print $ list $ (+1) <$> a
     print $ (+) <$> a <*> c
     print $ join $ a `cons` b `cons` Nil
-    print $ (==) a $ pure id <*> a -- Must be True
+    -- The following must be True
+    print $ Prelude.all (\(x, y) -> x == y)
+        [ (a, pure id <*> a)
+        , (a, a >>= return)
+        , (a >>= (\x -> (addWrap 1) x >>= (addWrap 2)), (a >>= (addWrap 1)) >>= (addWrap 2))
+        ]
     where
         a = 1 `cons` 2 `cons` Nil
         b = 3 `cons` 4 `cons` Nil
         c = 5 `cons` 6 `cons` 7 `cons` Nil
+        addWrap x = list . ((+) x)
