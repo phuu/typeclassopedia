@@ -113,6 +113,11 @@ main = do
     print $ join $ a `cons` b `cons` Nil
     print $ a >>= (return >=> (addWrap 1))
     print $ a >>= ((addWrap 1) >=> ((mulWrap 2) >=> (addWrap 3)))
+    print "do —"
+    print $ do
+        x <- a
+        y <- b
+        return $ x + y
     -- The following must be True
     print $ Prelude.all (\(x, y) -> x == y)
         [ (a, pure id <*> a)
@@ -132,5 +137,5 @@ main = do
         a = 1 `cons` 2 `cons` Nil
         b = 3 `cons` 4 `cons` Nil
         c = 5 `cons` 6 `cons` 7 `cons` Nil
-        addWrap x = list . ((+) x)
-        mulWrap x = list . ((*) x)
+        addWrap x = return . ((+) x)
+        mulWrap x = return . ((*) x)
